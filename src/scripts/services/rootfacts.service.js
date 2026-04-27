@@ -41,6 +41,8 @@ class RootFactsService {
       this.isModelLoaded = true;
       this.currentBackend = device;
 
+      console.log("Model generatif berhasil dimuat:", this.config.modelName, "| Backend:", device);
+
       return { success: true, model: this.config.modelName };
     } catch (error) {
       logError("Kesalahan memuat model Transformers.js", error);
@@ -55,37 +57,38 @@ class RootFactsService {
     }
   }
 
-  _getToneInstruction(tone) {
-    const toneMap = {
-      normal: "Write one interesting factual sentence about",
-      funny: "Write one short funny fact about",
-      professional: "Write one precise scientific fact about",
-      casual: "Write one casual friendly fact about",
+  _buildPrompt(vegetable, tone) {
+    const promptMap = {
+      normal: `Write a short interesting fact about the vegetable ${vegetable}.`,
+      funny: `Write a short funny fact about the vegetable ${vegetable}.`,
+      professional: `Write a short scientific fact about the vegetable ${vegetable}.`,
+      casual: `Tell me a fun fact about the vegetable ${vegetable}.`,
     };
-    return toneMap[tone] || toneMap.normal;
+    return promptMap[tone] || promptMap.normal;
   }
 
   _cleanGeneratedText(rawText, vegetable) {
+    if (!rawText || rawText.trim().length === 0) {
+      return `${vegetable} is a nutritious and interesting vegetable.`;
+    }
+
     let text = rawText.trim();
 
-    const sentenceMatch = text.match(/^[^.!?]*[.!?]/);
-    if (sentenceMatch) {
-      text = sentenceMatch[0];
+    text = text.replace(/^[\s\n\r]+/, "");
+
+    const sentences = text.match(/[^.!?]*[.!?]+/g);
+    if (sentences && sentences.length > 0) {
+      text = sentences[0].trim();
     }
 
     text = text.trim();
 
-    if (!text.toLowerCase().startsWith(vegetable.toLowerCase())) {
-      const vegIndex = text.toLowerCase().indexOf(vegetable.toLowerCase());
-      if (vegIndex !== -1) {
-        text = text.slice(vegIndex);
-      } else {
-        text = `${vegetable} is ${text.charAt(0).toLowerCase()}${text.slice(1)}`;
-      }
-    }
-
     if (text && !/[.!?]$/.test(text)) {
       text += ".";
+    }
+
+    if (!text || text.length < 10) {
+      return `${vegetable} is a nutritious and interesting vegetable.`;
     }
 
     return text;
@@ -97,7 +100,12 @@ class RootFactsService {
     }
 
     if (this.isGenerating) {
-      throw new Error("Sedang memproses permintaan lain");
+      console.log("Generasi sedang berjalan, menunggu...");
+      return {
+        vegetable,
+        fact: `${vegetable} is a popular and nutritious vegetable.`,
+        tone,
+      };
     }
 
     const MAX_INPUT_LENGTH = 50;
@@ -118,28 +126,31 @@ class RootFactsService {
 
     try {
       const activeTone = tone || this.currentTone;
-      const toneInstruction = this._getToneInstruction(activeTone);
+      const prompt = this._buildPrompt(cleanedInput, activeTone);
 
-      const prompt = `${toneInstruction} ${cleanedInput}. ${cleanedInput} is`;
+      console.log("Prompt untuk model generatif:", prompt);
 
       const result = await this.generator(prompt, {
-        max_new_tokens: 60,
+        max_new_tokens: 100,
         temperature: 0.7,
         top_p: 0.9,
         do_sample: true,
         repetition_penalty: 1.3,
       });
 
-      let generatedText =
-        result && result[0] && result[0].generated_text
-          ? result[0].generated_text
-          : `${cleanedInput} is a nutritious vegetable.`;
+      console.log("Hasil mentah dari model generatif:", result);
+
+      let generatedText = "";
+
+      if (result && result[0] && result[0].generated_text) {
+        generatedText = result[0].generated_text;
+      }
+
+      console.log("Teks sebelum pembersihan:", generatedText);
 
       generatedText = this._cleanGeneratedText(generatedText, cleanedInput);
 
-      if (generatedText.length < 10) {
-        generatedText = `${cleanedInput} is a fascinating vegetable worth knowing about.`;
-      }
+      console.log("Teks setelah pembersihan:", generatedText);
 
       return {
         vegetable: cleanedInput,
@@ -148,7 +159,12 @@ class RootFactsService {
       };
     } catch (error) {
       logError("Gagal menghasilkan fakta", error);
-      throw new Error(`Gagal menghasilkan fakta: ${error.message}`);
+
+      return {
+        vegetable: cleanedInput,
+        fact: `${cleanedInput} is a nutritious vegetable enjoyed worldwide.`,
+        tone: tone || this.currentTone,
+      };
     } finally {
       this.isGenerating = false;
     }

@@ -151,6 +151,8 @@ class HomePresenter {
 
   async generateAndShowResults(detectionResult) {
     try {
+      console.log("Memulai proses generasi untuk:", detectionResult.className);
+
       this.view.showResults(detectionResult, null);
 
       this.isRunning = false;
@@ -163,6 +165,7 @@ class HomePresenter {
       this.view.updateCameraUI(false, true);
 
       if (this.generator && this.generator.isReady()) {
+        console.log("Generator siap, menunggu sebelum memulai generasi...");
         await createDelay(this.config.factsGenerationDelay);
         this.view.updateFactsState("loading");
 
@@ -170,16 +173,26 @@ class HomePresenter {
           const toneSelect = document.getElementById("tone-select");
           const tone = toneSelect ? toneSelect.value : "normal";
 
+          console.log("Memanggil generateFacts dengan:", detectionResult.className, "tone:", tone);
+
           const factsData = await this.generator.generateFacts(
             detectionResult.className,
             tone,
           );
-          this.view.updateFactsState("success", factsData.fact);
+
+          console.log("Hasil generasi diterima:", factsData);
+
+          if (factsData && factsData.fact) {
+            this.view.updateFactsState("success", factsData.fact);
+          } else {
+            this.view.updateFactsState("error");
+          }
         } catch (factsError) {
           logError("Gagal menghasilkan fakta menarik", factsError);
           this.view.updateFactsState("error");
         }
       } else {
+        console.log("Generator tidak tersedia atau belum siap");
         this.view.updateFactsState("error");
       }
     } catch (error) {

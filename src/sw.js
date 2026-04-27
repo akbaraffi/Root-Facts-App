@@ -20,7 +20,46 @@ if (workbox) {
     { url: 'https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.22.0/dist/tf.min.js', revision: '1.0.0' },
     { url: 'https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-backend-webgpu@4.22.0/dist/tf-backend-webgpu.min.js', revision: '1.0.0' },
     { url: 'https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.4.2/dist/transformers.min.js', revision: '1.0.0' },
+    { url: 'https://unpkg.com/lucide@0.462.0/dist/umd/lucide.js', revision: '1.0.0' },
   ]);
+
+  workbox.routing.registerRoute(
+    ({request}) => request.destination === 'style',
+    new workbox.strategies.StaleWhileRevalidate({
+      cacheName: 'css-cache',
+    })
+  );
+
+  workbox.routing.registerRoute(
+    ({url}) => url.origin === 'https://fonts.googleapis.com' || url.origin === 'https://fonts.gstatic.com',
+    new workbox.strategies.CacheFirst({
+      cacheName: 'google-fonts-cache',
+      plugins: [
+        new workbox.cacheableResponse.CacheableResponsePlugin({
+          statuses: [0, 200],
+        }),
+      ],
+    })
+  );
+
+  workbox.routing.registerRoute(
+    ({url}) => url.origin === 'https://cdn.jsdelivr.net',
+    new workbox.strategies.CacheFirst({
+      cacheName: 'cdn-cache',
+      plugins: [
+        new workbox.cacheableResponse.CacheableResponsePlugin({
+          statuses: [0, 200],
+        }),
+      ],
+    })
+  );
+
+  workbox.routing.registerRoute(
+    ({request}) => request.destination === 'image',
+    new workbox.strategies.CacheFirst({
+      cacheName: 'image-cache',
+    })
+  );
 
 } else {
   console.log('Workbox gagal dimuat');

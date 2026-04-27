@@ -153,6 +153,13 @@ export default class HomePage {
         showElement(stateResult);
         addFadeInAnimation(stateResult);
 
+        const factText = document.getElementById("fun-fact-text");
+        if (factText) {
+          factText.textContent = "Memuat fakta menarik...";
+        }
+        const factLoading = document.getElementById("fun-fact-loading");
+        hideElement(factLoading);
+
         const detectedName = document.getElementById("detected-name");
         if (detectedName) {
           detectedName.textContent = detectionResult.className;
