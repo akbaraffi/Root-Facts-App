@@ -1,1 +1,1 @@
-APP_URL=https://moonlit-salamander-8f592f.netlify.app
+APP_URL = https://root-facts-akbar.netlify.app/
