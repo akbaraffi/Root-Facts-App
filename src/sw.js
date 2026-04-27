@@ -7,6 +7,25 @@ if (workbox) {
   workbox.core.clientsClaim();
   workbox.precaching.cleanupOutdatedCaches();
 
+  self.addEventListener('activate', (event) => {
+    const runtimeCaches = [
+      'css-cache',
+      'google-fonts-cache',
+      'cdn-cache',
+      'image-cache',
+    ];
+
+    event.waitUntil(
+      caches.keys().then((cacheNames) =>
+        Promise.all(
+          cacheNames
+            .filter((cacheName) => runtimeCaches.includes(cacheName))
+            .map((cacheName) => caches.delete(cacheName))
+        )
+      )
+    );
+  });
+
   workbox.precaching.precacheAndRoute([
     { url: '/', revision: '1.0.1' },
     { url: '/index.html', revision: '1.0.1' },
@@ -30,7 +49,7 @@ if (workbox) {
 
   workbox.routing.registerRoute(
     ({request}) => request.destination === 'style',
-    new workbox.strategies.StaleWhileRevalidate({
+    new workbox.strategies.NetworkFirst({
       cacheName: 'css-cache',
     })
   );
