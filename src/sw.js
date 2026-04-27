@@ -7,6 +7,7 @@ if (workbox) {
     { url: '/', revision: '1.0.0' },
     { url: '/index.html', revision: '1.0.0' },
     { url: '/app.bundle.js', revision: '1.0.0' },
+    { url: '/app.bundle.css', revision: '1.0.0' },
     { url: '/manifest.json', revision: '1.0.0' },
     { url: '/favicon.ico', revision: '1.0.0' },
     { url: '/icons/icon-192x192.png', revision: '1.0.0' },
@@ -19,7 +20,7 @@ if (workbox) {
     { url: '/model/weights.bin', revision: '1.0.0' },
     { url: 'https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.22.0/dist/tf.min.js', revision: '1.0.0' },
     { url: 'https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-backend-webgpu@4.22.0/dist/tf-backend-webgpu.min.js', revision: '1.0.0' },
-    { url: 'https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.4.2/dist/transformers.min.js', revision: '1.0.0' },
+    { url: 'https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.8.1', revision: '1.0.0' },
     { url: 'https://unpkg.com/lucide@0.462.0/dist/umd/lucide.js', revision: '1.0.0' },
   ]);
 

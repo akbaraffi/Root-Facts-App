@@ -35,7 +35,7 @@ const TENSORFLOW_CONFIG = {
 };
 
 const TRANSFORMERS_CONFIG = {
-  cdnUrl: "https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.4.2/dist/transformers.min.js",
+  cdnUrl: "https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.8.1",
   modelName: "Xenova/LaMini-Flan-T5-248M",
 };
 

@@ -9,19 +9,15 @@ class App {
   }
 
   registerServiceWorker() {
-    if ('serviceWorker' in navigator && process.env.NODE_ENV === 'production') {
-      window.addEventListener('load', () => {
-        navigator.serviceWorker
-          .register('/sw.js')
-          .then((registration) => {
-            console.log('SW terdaftar:', registration);
-          })
-          .catch((error) => {
-            console.log('Pendaftaran SW gagal:', error);
-          });
-      });
-    } else {
-      console.log('Service Worker tidak diregistrasi di mode development.');
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker
+        .register('/sw.js')
+        .then((registration) => {
+          console.log('SW terdaftar:', registration);
+        })
+        .catch((error) => {
+          console.log('Pendaftaran SW gagal:', error);
+        });
     }
   }
 
